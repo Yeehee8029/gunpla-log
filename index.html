@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gunpla Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2EFE7;
+    --paper-raised:#FBFAF6;
+    --ink:#16181D;
+    --blueprint:#1E4FA3;
+    --blueprint-dim:#4B6FB0;
+    --signal:#C6402C;
+    --signal-dim:#E7DCD3;
+    --steel:#8B93A0;
+    --steel-line:#C9C3B5;
+    --gold:#B9862E;
+    --green:#3D7A4E;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      linear-gradient(var(--steel-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--steel-line) 1px, transparent 1px);
+    background-size:28px 28px;
+    background-attachment:local;
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+  }
+  .display{font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.04em;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .muted{color:var(--steel); font-size:13px;}
+  a{color:var(--blueprint);}
+
+  header{
+    background:var(--ink);
+    color:var(--paper);
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:5px solid var(--blueprint);
+    position:sticky; top:0; z-index:40;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .chip{width:16px;height:16px;background:var(--signal);display:inline-block;}
+  .brand h1{font-size:22px; margin:0; font-weight:700; letter-spacing:0.08em;}
+  .brand small{display:block; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--steel-line); letter-spacing:0.12em; text-transform:none;}
+  .profile-area{display:flex; align-items:center; gap:10px;}
+  .profile-pill{
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.18);
+    padding:6px 12px; border-radius:20px;
+    font-size:13px;
+  }
+  .profile-avatar{
+    width:22px;height:22px;border-radius:50%;
+    background:var(--blueprint-dim);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Oswald',sans-serif; font-size:12px; font-weight:600; color:#fff;
+  }
+  .btn{
+    font-family:'IBM Plex Sans',sans-serif;
+    border:none; cursor:pointer;
+    padding:8px 14px;
+    font-size:13px; font-weight:600;
+    border-radius:2px;
+    transition:transform .08s ease, filter .12s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn:disabled{opacity:0.55; cursor:default;}
+  .btn-ghost{background:transparent; border:1px solid rgba(255,255,255,0.35); color:var(--paper);}
+  .btn-ghost:hover{background:rgba(255,255,255,0.08);}
+  .btn-primary{background:var(--signal); color:#fff;}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-outline{background:var(--paper-raised); border:1.5px solid var(--ink); color:var(--ink);}
+  .btn-outline:hover{background:var(--paper);}
+  .btn-sm{padding:5px 10px; font-size:12px;}
+  .btn-full{width:100%;}
+
+  #main-nav{
+    background:var(--paper-raised); border-bottom:2px solid var(--ink);
+    display:flex; gap:0; position:sticky; top:63px; z-index:35; padding:0 24px;
+  }
+  .nav-item{
+    background:none; border:none; cursor:pointer; padding:12px 20px;
+    font-family:'Oswald',sans-serif; text-transform:uppercase; letter-spacing:0.06em;
+    font-size:14px; font-weight:600; color:var(--steel); border-bottom:3px solid transparent;
+    margin-bottom:-2px;
+  }
+  .nav-item:hover{color:var(--ink);}
+  .nav-item.active{color:var(--ink); border-bottom-color:var(--signal);}
+
+  main{max-width:1180px; margin:0 auto; padding:22px 24px 80px;}
+
+  .onboard{
+    max-width:460px; margin:60px auto; background:var(--paper-raised);
+    border:2px solid var(--ink); padding:32px; position:relative;
+  }
+  .onboard:before{
+    content:"FIG. 00 — REGISTER BUILDER"; position:absolute; top:-11px; left:16px;
+    background:var(--paper); padding:0 8px; font-family:'IBM Plex Mono',monospace;
+    font-size:10px; letter-spacing:0.1em; color:var(--steel);
+  }
+  .onboard h2{margin-top:0;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:12px; font-weight:600; margin-bottom:6px; letter-spacing:0.03em; color:var(--ink);}
+  .field input, .field select, .field textarea{
+    width:100%; padding:9px 10px; border:1.5px solid var(--ink); background:#fff;
+    font-family:'IBM Plex Sans',sans-serif; font-size:14px; border-radius:2px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{outline:2px solid var(--blueprint); outline-offset:1px;}
+  .swatches{display:flex; gap:8px; margin-top:6px;}
+  .swatch{width:26px;height:26px;border-radius:50%; cursor:pointer; border:2px solid transparent;}
+  .swatch.selected{border-color:var(--ink);}
+
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+  .section-head h2{margin:0; font-size:19px;}
+  .section-head .muted{margin:0;}
+
+  section.block{margin-bottom:34px;}
+
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    margin-bottom:18px; border:1.5px solid var(--ink); background:var(--paper-raised);
+  }
+  .stat{padding:14px 16px; border-right:1.5px dashed var(--steel-line); position:relative;}
+  .stat:last-child{border-right:none;}
+  .stat .num{font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600; line-height:1;}
+  .stat .lbl{font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--steel); margin-top:4px;}
+  .stat .tag{position:absolute; top:8px; right:10px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--steel-line);}
+
+  .tabs{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap;}
+  .tab{
+    padding:8px 16px; font-family:'Oswald',sans-serif; text-transform:uppercase;
+    letter-spacing:0.05em; font-size:13px; font-weight:600;
+    background:transparent; border:1.5px solid var(--ink); cursor:pointer; color:var(--ink);
+  }
+  .tab .cnt{font-family:'IBM Plex Mono',monospace; font-weight:400; margin-left:6px; font-size:11px; color:var(--steel);}
+  .tab.active{background:var(--ink); color:var(--paper);}
+  .tab.active .cnt{color:var(--steel-line);}
+
+  .tabs-row{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    margin-bottom:14px;
+  }
+  .tabs-row .tabs{margin-bottom:0;}
+  .view-toggle{display:flex; gap:0; border:1.5px solid var(--ink);}
+  .view-toggle-btn{
+    padding:7px 14px; font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+    background:var(--paper-raised); border:none; cursor:pointer; color:var(--ink);
+    border-right:1.5px solid var(--ink);
+  }
+  .view-toggle-btn:last-child{border-right:none;}
+  .view-toggle-btn.active{background:var(--ink); color:var(--paper);}
+
+  .table-wrap{border:1.5px solid var(--ink); background:var(--paper-raised); overflow-x:auto;}
+  .kit-table{width:100%; border-collapse:collapse; font-size:13px;}
+  .kit-table th{
+    text-align:left; padding:10px 12px; font-family:'Oswald',sans-serif; text-transform:uppercase;
+    letter-spacing:0.05em; font-size:11px; color:var(--steel); border-bottom:2px solid var(--ink);
+    white-space:nowrap;
+  }
+  .kit-table td{padding:9px 12px; border-bottom:1px dashed var(--steel-line); vertical-align:middle;}
+  .kit-table tbody tr{cursor:pointer;}
+  .kit-table tbody tr:hover{background:var(--paper);}
+  .kit-table tbody tr:last-child td{border-bottom:none;}
+  .table-thumb{width:36px; height:36px; overflow:hidden; background:var(--paper); border:1px solid var(--steel-line);}
+  .table-thumb svg{width:100%; height:100%;}
+  .table-name-cell{display:flex; flex-direction:column; gap:2px;}
+  .table-pb-tag{font-size:9px; color:var(--gold); font-family:'IBM Plex Mono',monospace; letter-spacing:0.05em; text-transform:uppercase;}
+
+  .filterbar{
+    display:flex; gap:10px; flex-wrap:wrap; align-items:end;
+    background:var(--paper-raised); border:1px solid var(--steel-line); padding:12px 14px; margin-bottom:20px;
+  }
+  .filterbar .field{margin-bottom:0; min-width:150px; flex:1;}
+  .filterbar .field.search{flex:2; min-width:180px;}
+  .filterbar label{font-size:10px; color:var(--steel); letter-spacing:0.08em;}
+  .filterbar select, .filterbar input{border:1px solid var(--steel-line); padding:7px 8px; font-size:13px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:18px;}
+  .empty{
+    grid-column:1/-1; text-align:center; padding:40px 20px; border:2px dashed var(--steel-line);
+    color:var(--steel); background:var(--paper-raised);
+  }
+  .empty .display{color:var(--ink); font-size:18px; margin-bottom:6px;}
+
+  .pagination{
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    margin-top:22px; flex-wrap:wrap;
+  }
+  .page-btn{
+    min-width:34px; padding:6px 10px; border:1.5px solid var(--ink); background:var(--paper-raised);
+    cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink);
+  }
+  .page-btn:hover:not(:disabled){background:var(--paper);}
+  .page-btn.active{background:var(--ink); color:var(--paper);}
+  .page-btn:disabled{opacity:0.4; cursor:default;}
+  .page-info{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--steel); margin:0 6px;}
+
+  .kit-card{
+    position:relative; background:var(--paper-raised);
+    border:2px dashed var(--steel-line);
+    padding:0 14px 14px; cursor:pointer;
+    transition:border-color .12s ease, transform .08s ease;
+    display:flex; flex-direction:column;
+  }
+  .kit-card:hover{border-color:var(--ink); transform:translateY(-2px);}
+  .kit-card:before{
+    content:""; position:absolute; top:-6px; left:50%; transform:translateX(-50%);
+    width:14px; height:6px; background:var(--paper); border:2px dashed var(--steel-line); border-bottom:none;
+  }
+  .kit-thumb{
+    margin:0 -14px 12px; height:108px; border-bottom:1.5px dashed var(--steel-line);
+    display:flex; align-items:center; justify-content:center; background:var(--paper);
+    position:relative; overflow:hidden;
+  }
+  .kit-thumb svg{width:100%; height:100%;}
+  .part-tag{
+    position:absolute; top:8px; left:10px; font-family:'IBM Plex Mono',monospace;
+    font-size:10px; color:var(--steel); letter-spacing:0.04em; z-index:2;
+  }
+  .kit-card-body{padding-top:14px;}
+
+  .pill{
+    display:inline-block; padding:3px 10px; border-radius:999px; font-size:10px;
+    font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .pill.built{background:var(--signal); color:#fff;}
+  .pill.backlog{background:var(--blueprint); color:#fff;}
+  .pill.wishlist{background:#fff; color:var(--steel); border:1px solid var(--steel-line);}
+
+  .pbandai-badge{
+    display:inline-flex; align-items:center; gap:4px; padding:3px 8px;
+    border-radius:2px; font-size:9px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; font-family:'IBM Plex Mono',monospace;
+    background:var(--gold); color:#fff;
+  }
+
+  .kit-name{font-family:'Oswald',sans-serif; font-size:17px; font-weight:600; margin:0 0 4px; line-height:1.2;}
+  .kit-series{font-size:12px; color:var(--steel); margin-bottom:10px;}
+  .kit-meta{display:flex; align-items:center; justify-content:space-between; margin-top:4px; flex-wrap:wrap; gap:6px;}
+  .grade-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600;
+    padding:3px 8px; border-radius:20px; border:1px solid var(--ink); background:#fff;
+  }
+  .year{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--steel);}
+  .kit-footer-row{display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:8px;}
+
+
+  .overlay{
+    position:fixed; inset:0; background:rgba(22,24,29,0.55); display:none;
+    align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto; z-index:100;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--paper-raised); border:2px solid var(--ink); max-width:480px; width:100%;
+    padding:28px; position:relative; margin-bottom:40px;
+  }
+  .modal-label{
+    position:absolute; top:-11px; left:16px; background:var(--paper-raised); padding:0 8px;
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--steel);
+  }
+  .modal h2{margin-top:4px;}
+  .modal-row{display:flex; gap:10px;}
+  .modal-row .field{flex:1;}
+  .modal-actions{display:flex; justify-content:space-between; align-items:center; margin-top:22px;}
+  .close-x{
+    position:absolute; top:14px; right:14px; background:none; border:none; cursor:pointer;
+    font-size:18px; color:var(--steel); line-height:1;
+  }
+  .danger-link{background:none; border:none; color:var(--signal); font-size:12px; cursor:pointer; text-decoration:underline; font-family:'IBM Plex Sans',sans-serif;}
+
+  .fab{
+    position:fixed; bottom:28px; right:28px; width:58px; height:58px; border-radius:50%;
+    background:var(--signal); color:#fff; border:none; font-size:28px; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,0.3); z-index:30;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .fab:hover{filter:brightness(1.08);}
+
+  @media (max-width:640px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .stat:nth-child(2){border-right:none;}
+  }
+</style>
+</head>
+<body>
+
+<header id="app-header" style="display:none;">
+  <div class="brand">
+    <span class="chip"></span>
+    <div>
+      <h1>Gunpla Log</h1>
+      <small>Personal build portfolio &mdash; ref. Gunplapedia &amp; gunpla.fyi</small>
+    </div>
+  </div>
+  <div class="profile-area">
+    <div class="profile-pill">
+      <span class="profile-avatar" id="profile-avatar">B</span>
+      <span id="profile-name-label">Builder</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="switch-profile-btn">Switch</button>
+  </div>
+</header>
+
+<nav id="main-nav" style="display:none;">
+  <button class="nav-item" data-view="discover">Discover</button>
+  <button class="nav-item" data-view="portfolio">Portfolio</button>
+</nav>
+
+<main>
+  <div id="onboard-view" class="onboard" style="display:none;">
+    <h2 class="display">Register Builder</h2>
+    <p style="font-size:13px;color:var(--steel);margin-top:-8px;">Create a local builder profile to start your kit portfolio. No password needed &mdash; this profile is saved to your account here.</p>
+    <div id="existing-profiles"></div>
+    <div class="field">
+      <label for="new-profile-input">New builder callsign</label>
+      <input type="text" id="new-profile-input" placeholder="e.g. Amuro, Char, Newtype92">
+    </div>
+    <div class="field">
+      <label>Badge color</label>
+      <div class="swatches" id="color-swatches"></div>
+    </div>
+    <button class="btn btn-primary btn-full" id="create-profile-btn">Create profile &amp; enter workshop</button>
+  </div>
+
+  <div id="main-view" style="display:none;">
+
+    <section class="block" id="portfolio-section">
+      <div class="stats">
+        <div class="stat"><span class="tag">01</span><div class="num mono" id="stat-total">0</div><div class="lbl">Total Kits</div></div>
+        <div class="stat"><span class="tag">02</span><div class="num mono" id="stat-built">0</div><div class="lbl">Built</div></div>
+        <div class="stat"><span class="tag">03</span><div class="num mono" id="stat-backlog">0</div><div class="lbl">Backlog</div></div>
+        <div class="stat"><span class="tag">04</span><div class="num mono" id="stat-wishlist">0</div><div class="lbl">Wishlist</div></div>
+      </div>
+
+      <div class="tabs-row">
+        <div class="tabs" id="folder-tabs"></div>
+        <div class="view-toggle" id="view-toggle">
+          <button type="button" class="view-toggle-btn active" data-mode="grid" title="Grid view">&#9638; Grid</button>
+          <button type="button" class="view-toggle-btn" data-mode="list" title="List view">&#9776; List</button>
+        </div>
+      </div>
+
+      <div class="filterbar">
+        <div class="field search">
+          <label>Search</label>
+          <input type="text" id="search-input" placeholder="Search kit name...">
+        </div>
+        <div class="field">
+          <label>Grade</label>
+          <select id="filter-grade"></select>
+        </div>
+        <div class="field">
+          <label>Series</label>
+          <select id="filter-series"></select>
+        </div>
+        <div class="field">
+          <label>Sort by</label>
+          <select id="sort-select">
+            <option value="year-desc" selected>Release year (newest)</option>
+            <option value="year-asc">Release year (oldest)</option>
+            <option value="name-asc">Name (A&ndash;Z)</option>
+            <option value="grade-asc">Grade</option>
+            <option value="added-desc">Recently added</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid" id="kit-grid"></div>
+      <div class="table-wrap" id="kit-table-wrap" style="display:none;">
+        <table class="kit-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Name</th>
+              <th>Grade</th>
+              <th>Series</th>
+              <th>Year</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="kit-table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="kit-pagination"></div>
+    </section>
+
+    <section class="block" id="discover-section">
+      <div class="section-head">
+        <div>
+          <h2 class="display">Discover Kits</h2>
+          <p class="muted">Sourced from Gunplapedia &amp; gunpla.fyi listings</p>
+        </div>
+      </div>
+      <div id="discover-body">
+        <div class="tabs-row">
+          <div class="tabs" id="discover-tabs">
+            <button class="tab active" data-tab="recent">Recently Released</button>
+            <button class="tab" data-tab="popular">Popular Kits</button>
+          </div>
+          <div class="view-toggle" id="discover-view-toggle">
+            <button type="button" class="view-toggle-btn active" data-mode="grid" title="Grid view">&#9638; Grid</button>
+            <button type="button" class="view-toggle-btn" data-mode="list" title="List view">&#9776; List</button>
+          </div>
+        </div>
+
+        <div class="filterbar">
+          <div class="field search">
+            <label>Search</label>
+            <input type="text" id="discover-search-input" placeholder="Search kit name...">
+          </div>
+          <div class="field">
+            <label>Grade</label>
+            <select id="discover-filter-grade"></select>
+          </div>
+          <div class="field">
+            <label>Series</label>
+            <select id="discover-filter-series"></select>
+          </div>
+        </div>
+
+        <div class="grid" id="discover-grid"></div>
+        <div class="table-wrap" id="discover-table-wrap" style="display:none;">
+          <table class="kit-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Grade</th>
+                <th>Series</th>
+                <th>Year</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="discover-table-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination" id="discover-pagination"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<button class="fab" id="add-kit-fab" style="display:none;" title="Add a kit">+</button>
+
+<div class="overlay" id="kit-overlay">
+  <div class="modal">
+    <span class="modal-label" id="kit-modal-label">FIG. 01 &mdash; ADD KIT</span>
+    <button class="close-x" id="kit-modal-close">&times;</button>
+    <h2 class="display" id="kit-modal-title">Add Kit</h2>
+    <form id="kit-form">
+      <div class="field">
+        <label for="kit-name">Kit name</label>
+        <input type="text" id="kit-name" required placeholder="e.g. RX-78-2 Gundam">
+      </div>
+      <div class="modal-row">
+        <div class="field">
+          <label for="kit-grade">Grade</label>
+          <select id="kit-grade"></select>
+        </div>
+        <div class="field">
+          <label for="kit-year">Release year</label>
+          <input type="number" id="kit-year" min="1980" max="2035" placeholder="e.g. 1999">
+        </div>
+      </div>
+      <div class="field">
+        <label for="kit-series">Series</label>
+        <select id="kit-series"></select>
+      </div>
+      <div class="field">
+        <label for="kit-status">Status</label>
+        <select id="kit-status">
+          <option value="Wishlist">Wishlist</option>
+          <option value="Backlog">Backlog</option>
+          <option value="Built">Built</option>
+        </select>
+      </div>
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:8px; font-weight:600;">
+          <input type="checkbox" id="kit-pbandai" style="width:auto;">
+          This is a P-Bandai exclusive release
+        </label>
+      </div>
+      <div class="field">
+        <label for="kit-notes">Notes (optional)</label>
+        <textarea id="kit-notes" rows="2" placeholder="Paint scheme, gate marks, panel lining plans..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="danger-link" id="delete-kit-btn" style="visibility:hidden;">Remove kit</button>
+        <div style="display:flex; gap:10px;">
+          <button type="button" class="btn btn-outline" id="kit-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="kit-save-btn">Save kit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="profile-overlay">
+  <div class="modal">
+    <span class="modal-label">FIG. 00 &mdash; BUILDER PROFILES</span>
+    <button class="close-x" id="profile-modal-close">&times;</button>
+    <h2 class="display">Switch Builder</h2>
+    <div id="profile-list"></div>
+    <div class="field" style="margin-top:16px;">
+      <label>Add another builder callsign</label>
+      <input type="text" id="add-profile-input" placeholder="e.g. Kira, Setsuna">
+    </div>
+    <button class="btn btn-outline btn-full" id="add-profile-btn">Add profile</button>
+  </div>
+</div>
+
+<script>
+const GRADES = ["High Grade","Real Grade","Master Grade","Perfect Grade","Entry Grade","First Grade","Full Mechanics","Hi-Resolution Model","Reborn-One Hundred","SD/BB","Mega Size Model","Non-Gundam / Other"];
+
+const SERIES = [
+  "Mobile Suit Gundam","Mobile Suit Zeta Gundam","Mobile Suit Gundam ZZ","Char's Counterattack",
+  "Gundam 0080: War in the Pocket","Gundam F91","Gundam 0083: Stardust Memory","Victory Gundam",
+  "G Gundam","Gundam Wing","The 08th MS Team","After War Gundam X","Turn A Gundam",
+  "Gundam SEED","Gundam SEED Destiny","Gundam 00","Gundam Unicorn","BB Senshi Sangokuden",
+  "Gundam AGE","Build Fighters","Reconguista in G","Build Fighters Try","The Origin",
+  "Iron-Blooded Orphans","Thunderbolt","Build Divers",
+  "Hathaway's Flash","Cucuruz Doan's Island","The Witch from Mercury","SEED Freedom",
+  "Build Metaverse","Requiem for Vengeance","GQuuuuuuX","Non-Gundam / Other"
+];
+
+const AVATAR_COLORS = ["#1E4FA3","#C6402C","#B9862E","#3D7A4E","#8B93A0","#6E4BAE"];
+const ACCENT_COLORS = ["#1E4FA3","#C6402C","#B9862E","#3D7A4E","#6E4BAE","#2E8C8C"];
+
+const CATALOG = [
+  // --- Verified against Bandai's official web-manual listing (manual.bandai-hobby.net), current as of Jul 2026 ---
+  {name:"HG Gouf Ignited (Heine Westenfluss Custom)", grade:"High Grade", series:"Thunderbolt", releaseYear:2026, releaseMonth:7, releaseDay:11, popular:false},
+  {name:"RG Freedom Gundam -Apex Legends Crypto Ver.-", grade:"Real Grade", series:"Gundam SEED", releaseYear:2026, releaseMonth:7, releaseDay:1, popular:false, pbandai:true},
+  {name:"RG Wing Gundam Zero EW -Apex Legends Valkyrie Ver.-", grade:"Real Grade", series:"Gundam Wing", releaseYear:2026, releaseMonth:7, releaseDay:1, popular:false, pbandai:true},
+  {name:"HG Hambrabi (GQ)", grade:"High Grade", series:"GQuuuuuuX", releaseYear:2026, releaseMonth:6, releaseDay:26, popular:false},
+  {name:"HG Gundam Sandrock Custom EW", grade:"High Grade", series:"Gundam Wing", releaseYear:2026, releaseMonth:6, releaseDay:6, popular:false},
+  {name:"RG Gundam Exia Repair IV", grade:"Real Grade", series:"Gundam 00", releaseYear:2026, releaseMonth:6, releaseDay:15, popular:false, pbandai:true},
+  {name:"Entry Grade Nu Gundam & Fin Funnel (Neon Green)", grade:"Entry Grade", series:"Char's Counterattack", releaseYear:2026, releaseMonth:6, releaseDay:15, popular:false},
+
+  {name:"HG White Gundam", grade:"High Grade", series:"GQuuuuuuX", releaseYear:2025, releaseMonth:12, popular:true},
+  {name:"HG Char's Zaku (GQ)", grade:"High Grade", series:"GQuuuuuuX", releaseYear:2025, releaseMonth:12, popular:false},
+  {name:"HG Gundam Zagan", grade:"High Grade", series:"Iron-Blooded Orphans", releaseYear:2025, releaseMonth:12, popular:false},
+  {name:"MG Gundam Barbatos Lupus", grade:"Master Grade", series:"Iron-Blooded Orphans", releaseYear:2025, releaseMonth:11, popular:true},
+  {name:"HG Monkey Rodi", grade:"High Grade", series:"Iron-Blooded Orphans", releaseYear:2025, releaseMonth:11, popular:false},
+  {name:"HG Zaku (GQuuuuuuX)", grade:"High Grade", series:"GQuuuuuuX", releaseYear:2025, releaseMonth:11, popular:false},
+  {name:"HG Rick Dom (GQ)", grade:"High Grade", series:"GQuuuuuuX", releaseYear:2025, releaseMonth:9, popular:false},
+  {name:"RG Wing Gundam Zero", grade:"Real Grade", series:"Gundam Wing", releaseYear:2025, releaseMonth:9, popular:true},
+  {name:"HG GFreD", grade:"High Grade", series:"GQuuuuuuX", releaseYear:2025, releaseMonth:8, popular:false},
+  {name:"MGSD Gundam Aerial", grade:"Master Grade", series:"The Witch from Mercury", releaseYear:2025, releaseMonth:8, popular:true},
+  {name:"RG Shining Gundam", grade:"Real Grade", series:"G Gundam", releaseYear:2025, releaseMonth:8, popular:false},
+  {name:"HG Galluss-J", grade:"High Grade", series:"Char's Counterattack", releaseYear:2025, releaseMonth:8, popular:false},
+  {name:"HG Messer Type-F02 (Minelayer)", grade:"High Grade", series:"Hathaway's Flash", releaseYear:2025, releaseMonth:8, popular:false},
+  {name:"HGUC Unicorn Gundam Perfectibility (Destroy Mode)", grade:"High Grade", series:"Gundam Unicorn", releaseYear:2025, releaseMonth:8, popular:true},
+
+  {name:"RX-78-2 Gundam (PG)", grade:"Perfect Grade", series:"Mobile Suit Gundam", releaseYear:1998, releaseMonth:6, popular:true},
+  {name:"Nu Gundam (PG)", grade:"Perfect Grade", series:"Char's Counterattack", releaseYear:1999, releaseMonth:6, popular:true},
+  {name:"Wing Gundam Zero Custom (MG)", grade:"Master Grade", series:"Gundam Wing", releaseYear:2007, releaseMonth:6, popular:true},
+  {name:"Exia (MG)", grade:"Master Grade", series:"Gundam 00", releaseYear:2007, releaseMonth:9, popular:true},
+  {name:"Freedom Gundam (MG)", grade:"Master Grade", series:"Gundam SEED", releaseYear:2005, releaseMonth:6, popular:true},
+  {name:"Strike Freedom Gundam (MG)", grade:"Master Grade", series:"Gundam SEED Destiny", releaseYear:2006, releaseMonth:6, popular:true},
+  {name:"Gundam Barbatos", grade:"High Grade", series:"Iron-Blooded Orphans", releaseYear:2015, releaseMonth:6, popular:true},
+  {name:"Zaku II (Entry Grade)", grade:"Entry Grade", series:"Mobile Suit Gundam", releaseYear:2019, releaseMonth:5, popular:false},
+  {name:"RX-78-2 Gundam (Entry Grade)", grade:"Entry Grade", series:"Mobile Suit Gundam", releaseYear:2019, releaseMonth:5, popular:true},
+  {name:"Gundam Aerial", grade:"High Grade", series:"The Witch from Mercury", releaseYear:2022, releaseMonth:10, popular:true},
+  {name:"Gundam Calibarn", grade:"High Grade", series:"The Witch from Mercury", releaseYear:2023, releaseMonth:6, popular:false},
+
+  // --- Perfect Grade: more evergreen PG releases ---
+  {name:"Unicorn Gundam (PG)", grade:"Perfect Grade", series:"Gundam Unicorn", releaseYear:2010, releaseMonth:5, popular:true},
+  {name:"Strike Freedom Gundam (PG)", grade:"Perfect Grade", series:"Gundam SEED Destiny", releaseYear:2010, releaseMonth:12, popular:true},
+  {name:"Wing Gundam Zero Custom (PG)", grade:"Perfect Grade", series:"Gundam Wing", releaseYear:2011, releaseMonth:7, popular:false},
+  {name:"00 Raiser (PG)", grade:"Perfect Grade", series:"Gundam 00", releaseYear:2014, releaseMonth:7, popular:false},
+  {name:"Sazabi (PG)", grade:"Perfect Grade", series:"Char's Counterattack", releaseYear:2018, releaseMonth:11, popular:true},
+
+  // --- First Grade ---
+  {name:"RX-78-2 Gundam (First Grade)", grade:"First Grade", series:"Mobile Suit Gundam", releaseYear:1999, releaseMonth:6, popular:true},
+  {name:"Zaku II (First Grade)", grade:"First Grade", series:"Mobile Suit Gundam", releaseYear:1999, releaseMonth:8, popular:false},
+
+  // --- Full Mechanics ---
+  {name:"Full Mechanics Gundam Barbatos", grade:"Full Mechanics", series:"Iron-Blooded Orphans", releaseYear:2017, releaseMonth:4, popular:false},
+  {name:"Full Mechanics 00 Gundam", grade:"Full Mechanics", series:"Gundam 00", releaseYear:2020, releaseMonth:7, popular:false},
+  {name:"Full Mechanics Freedom Gundam", grade:"Full Mechanics", series:"Gundam SEED", releaseYear:2023, releaseMonth:3, popular:false},
+
+  // --- Hi-Resolution Model ---
+  {name:"Hi-Resolution Model Nu Gundam", grade:"Hi-Resolution Model", series:"Char's Counterattack", releaseYear:2020, releaseMonth:6, popular:true},
+  {name:"Hi-Resolution Model Sazabi", grade:"Hi-Resolution Model", series:"Char's Counterattack", releaseYear:2021, releaseMonth:3, popular:false},
+  {name:"Hi-Resolution Model Zeta Gundam", grade:"Hi-Resolution Model", series:"Mobile Suit Zeta Gundam", releaseYear:2022, releaseMonth:7, popular:false},
+
+  // --- Reborn-One Hundred ---
+  {name:"RE/100 Hyaku-Shiki", grade:"Reborn-One Hundred", series:"Mobile Suit Zeta Gundam", releaseYear:2016, releaseMonth:1, popular:false},
+  {name:"RE/100 Turn A Gundam", grade:"Reborn-One Hundred", series:"Turn A Gundam", releaseYear:2016, releaseMonth:6, popular:false},
+  {name:"RE/100 Full Armor Gundam", grade:"Reborn-One Hundred", series:"The Origin", releaseYear:2017, releaseMonth:2, popular:false},
+  {name:"RE/100 AMX-107 Bawoo", grade:"Reborn-One Hundred", series:"Mobile Suit Zeta Gundam", releaseYear:2026, releaseMonth:4, popular:false},
+
+  // --- SD/BB ---
+  {name:"SD Gundam Cross Silhouette RX-78-2", grade:"SD/BB", series:"Mobile Suit Gundam", releaseYear:2018, releaseMonth:6, popular:false},
+  {name:"SD Gundam Cross Silhouette Barbatos", grade:"SD/BB", series:"Iron-Blooded Orphans", releaseYear:2018, releaseMonth:9, popular:false},
+  {name:"BB Senshi Ryubi Gundam", grade:"SD/BB", series:"BB Senshi Sangokuden", releaseYear:2005, releaseMonth:11, popular:false},
+  {name:"BB Senshi Sousou Gundam", grade:"SD/BB", series:"BB Senshi Sangokuden", releaseYear:2006, releaseMonth:3, popular:false},
+
+  // --- Mega Size Model ---
+  {name:"Mega Size Model RX-78-2 Gundam", grade:"Mega Size Model", series:"Mobile Suit Gundam", releaseYear:2010, releaseMonth:7, popular:false},
+  {name:"Mega Size Model Gundam Barbatos", grade:"Mega Size Model", series:"Iron-Blooded Orphans", releaseYear:2016, releaseMonth:11, popular:false},
+  {name:"Mega Size Model Freedom Gundam", grade:"Mega Size Model", series:"Gundam SEED", releaseYear:2020, releaseMonth:1, popular:false},
+
+  // --- Non-Gundam / Other ---
+  {name:"Figure-rise Standard Broly", grade:"Non-Gundam / Other", series:"Non-Gundam / Other", releaseYear:2018, releaseMonth:12, popular:false},
+  {name:"Figure-rise Standard Luffy", grade:"Non-Gundam / Other", series:"Non-Gundam / Other", releaseYear:2020, releaseMonth:8, popular:false},
+  {name:"Pokemon Model Kit Kyogre", grade:"Non-Gundam / Other", series:"Non-Gundam / Other", releaseYear:2026, releaseMonth:6, releaseDay:13, popular:false},
+  {name:"30MM bEXM-40 Novalv", grade:"Non-Gundam / Other", series:"Non-Gundam / Other", releaseYear:2026, releaseMonth:6, releaseDay:26, popular:false},
+
+  // --- Filling out series with light or no coverage above ---
+  {name:"Zeta Gundam (MG Ver.Ka)", grade:"Master Grade", series:"Mobile Suit Zeta Gundam", releaseYear:2005, releaseMonth:11, popular:true},
+  {name:"ZZ Gundam (HG Revive)", grade:"High Grade", series:"Mobile Suit Gundam ZZ", releaseYear:2016, releaseMonth:7, popular:false},
+  {name:"ZZ Gundam (MG Ver.Ka)", grade:"Master Grade", series:"Mobile Suit Gundam ZZ", releaseYear:2016, releaseMonth:12, popular:false},
+  {name:"RX-78NT-1 Alex (HG)", grade:"High Grade", series:"Gundam 0080: War in the Pocket", releaseYear:2014, releaseMonth:8, popular:false},
+  {name:"RX-78NT-1 Alex (MG)", grade:"Master Grade", series:"Gundam 0080: War in the Pocket", releaseYear:2015, releaseMonth:2, popular:false},
+  {name:"Gundam F91 (HG)", grade:"High Grade", series:"Gundam F91", releaseYear:2019, releaseMonth:6, popular:false},
+  {name:"Gundam F91 Ver.2.0 (MG)", grade:"Master Grade", series:"Gundam F91", releaseYear:2016, releaseMonth:10, popular:true},
+  {name:"Gundam GP01 (HG)", grade:"High Grade", series:"Gundam 0083: Stardust Memory", releaseYear:2015, releaseMonth:3, popular:false},
+  {name:"Gundam GP02A (MG)", grade:"Master Grade", series:"Gundam 0083: Stardust Memory", releaseYear:2004, releaseMonth:9, popular:false},
+  {name:"V2 Gundam (HG)", grade:"High Grade", series:"Victory Gundam", releaseYear:1999, releaseMonth:6, popular:false},
+  {name:"V2 Gundam Ver.Ka (MG)", grade:"Master Grade", series:"Victory Gundam", releaseYear:1998, releaseMonth:8, popular:true},
+  {name:"Gundam Ez8 (HG)", grade:"High Grade", series:"The 08th MS Team", releaseYear:2015, releaseMonth:9, popular:false},
+  {name:"Gundam X (HG)", grade:"High Grade", series:"After War Gundam X", releaseYear:1996, releaseMonth:8, popular:false},
+  {name:"Turn A Gundam (MG)", grade:"Master Grade", series:"Turn A Gundam", releaseYear:2019, releaseMonth:11, popular:true},
+  {name:"Gundam AGE-1 Normal (HG)", grade:"High Grade", series:"Gundam AGE", releaseYear:2011, releaseMonth:10, popular:false},
+  {name:"Build Strike Gundam Full Package (HG)", grade:"High Grade", series:"Build Fighters", releaseYear:2013, releaseMonth:11, popular:false},
+  {name:"Star Build Strike Gundam (HG)", grade:"High Grade", series:"Build Fighters", releaseYear:2014, releaseMonth:9, popular:false},
+  {name:"G-Self (HG)", grade:"High Grade", series:"Reconguista in G", releaseYear:2014, releaseMonth:11, popular:false},
+  {name:"Kamiki Burning Gundam (HG)", grade:"High Grade", series:"Build Fighters Try", releaseYear:2014, releaseMonth:12, popular:false},
+  {name:"Gundam (The Origin, HG)", grade:"High Grade", series:"The Origin", releaseYear:2015, releaseMonth:7, popular:true},
+  {name:"Gundam Build Divers (HG)", grade:"High Grade", series:"Build Divers", releaseYear:2018, releaseMonth:3, popular:false},
+  {name:"Zaku II (Cucuruz Doan's Zaku, HG)", grade:"High Grade", series:"Cucuruz Doan's Island", releaseYear:2022, releaseMonth:5, popular:false},
+  {name:"Freedom Gundam (SEED Freedom, HG)", grade:"High Grade", series:"SEED Freedom", releaseYear:2024, releaseMonth:1, popular:false},
+  {name:"Freedom Gundam 2.0 (MG)", grade:"Master Grade", series:"SEED Freedom", releaseYear:2024, releaseMonth:1, popular:true},
+  {name:"Unicorn Gundam (Entry Grade)", grade:"Entry Grade", series:"Gundam Unicorn", releaseYear:2020, releaseMonth:1, popular:false},
+  {name:"Strike Gundam (Entry Grade)", grade:"Entry Grade", series:"Gundam SEED", releaseYear:2021, releaseMonth:6, popular:false},
+
+  // --- Real Grade: complete numbered lineup (RG 01-43), per Gunpla Wiki's Real Grade list ---
+  {name:"RG 01 RX-78-2 Gundam", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2010, releaseMonth:7, popular:true},
+  {name:"RG 02 MS-06S Zaku II (Char's Custom)", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2010, releaseMonth:9, popular:true},
+  {name:"RG 03 Aile Strike Gundam", grade:"Real Grade", series:"Gundam SEED", releaseYear:2010, releaseMonth:12, popular:true},
+  {name:"RG 04 MS-06F Zaku II", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2011, releaseMonth:3, popular:false},
+  {name:"RG 05 Freedom Gundam", grade:"Real Grade", series:"Gundam SEED", releaseYear:2011, releaseMonth:5, popular:true},
+  {name:"RG 06 Skygrasper Launcher/Sword Pack", grade:"Real Grade", series:"Gundam SEED", releaseYear:2011, releaseMonth:7, popular:false},
+  {name:"RG 07 Gundam Mk-II (Titans)", grade:"Real Grade", series:"Mobile Suit Zeta Gundam", releaseYear:2011, releaseMonth:9, popular:false},
+  {name:"RG 08 Gundam Mk-II (A.E.U.G.)", grade:"Real Grade", series:"Mobile Suit Zeta Gundam", releaseYear:2011, releaseMonth:9, popular:false},
+  {name:"RG 09 Justice Gundam", grade:"Real Grade", series:"Gundam SEED", releaseYear:2011, releaseMonth:12, popular:false},
+  {name:"RG 10 Zeta Gundam", grade:"Real Grade", series:"Mobile Suit Zeta Gundam", releaseYear:2011, releaseMonth:11, popular:true},
+  {name:"RG 11 Destiny Gundam", grade:"Real Grade", series:"Gundam SEED Destiny", releaseYear:2012, releaseMonth:2, popular:true},
+  {name:"RG 12 Gundam GP01 Zephyranthes", grade:"Real Grade", series:"Gundam 0083: Stardust Memory", releaseYear:2012, releaseMonth:4, popular:false},
+  {name:"RG 13 Gundam GP01-Fb Full Burnern", grade:"Real Grade", series:"Gundam 0083: Stardust Memory", releaseYear:2012, releaseMonth:6, popular:false},
+  {name:"RG 14 Strike Freedom Gundam", grade:"Real Grade", series:"Gundam SEED Destiny", releaseYear:2012, releaseMonth:7, popular:true},
+  {name:"RG 15 Gundam Exia", grade:"Real Grade", series:"Gundam 00", releaseYear:2012, releaseMonth:9, popular:true},
+  {name:"RG 16 Z'Gok Commander Type", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2012, releaseMonth:11, popular:false},
+  {name:"RG 17 Wing Gundam Zero EW", grade:"Real Grade", series:"Gundam Wing", releaseYear:2012, releaseMonth:12, popular:true},
+  {name:"RG 18 00 Raiser", grade:"Real Grade", series:"Gundam 00", releaseYear:2013, releaseMonth:2, popular:false},
+  {name:"RG 19 Gundam Astray Red Frame", grade:"Real Grade", series:"Gundam SEED", releaseYear:2013, releaseMonth:4, popular:false},
+  {name:"RG 20 Wing Gundam EW", grade:"Real Grade", series:"Gundam Wing", releaseYear:2013, releaseMonth:6, popular:false},
+  {name:"RG 21 00 Qan[T]", grade:"Real Grade", series:"Gundam 00", releaseYear:2013, releaseMonth:8, popular:false},
+  {name:"RG 22 Sinanju", grade:"Real Grade", series:"Gundam Unicorn", releaseYear:2013, releaseMonth:10, popular:true},
+  {name:"RG 23 Build Strike Gundam Full Package", grade:"Real Grade", series:"Build Fighters", releaseYear:2013, releaseMonth:11, popular:false},
+  {name:"RG 24 Gundam Astray Gold Frame Amatsu Mina", grade:"Real Grade", series:"Gundam SEED", releaseYear:2014, releaseMonth:2, popular:false},
+  {name:"RG 25 Unicorn Gundam", grade:"Real Grade", series:"Gundam Unicorn", releaseYear:2014, releaseMonth:4, popular:true},
+  {name:"RG 26 Zaku II High Mobility Type (Johnny Ridden Custom)", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2014, releaseMonth:7, popular:false},
+  {name:"RG 27 Unicorn Gundam 02 Banshee Norn", grade:"Real Grade", series:"Gundam Unicorn", releaseYear:2015, releaseMonth:2, popular:false},
+  {name:"RG 28 Tallgeese EW", grade:"Real Grade", series:"Gundam Wing", releaseYear:2015, releaseMonth:4, popular:false},
+  {name:"RG 29 Sazabi", grade:"Real Grade", series:"Char's Counterattack", releaseYear:2015, releaseMonth:7, popular:true},
+  {name:"RG 30 Full Armor Unicorn Gundam", grade:"Real Grade", series:"Gundam Unicorn", releaseYear:2015, releaseMonth:11, popular:false},
+  {name:"RG 31 Crossbone Gundam X-1", grade:"Real Grade", series:"Gundam F91", releaseYear:2016, releaseMonth:2, popular:false},
+  {name:"RG 32 Nu Gundam", grade:"Real Grade", series:"Char's Counterattack", releaseYear:2016, releaseMonth:6, popular:true},
+  {name:"RG 33 Force Impulse Gundam", grade:"Real Grade", series:"Gundam SEED Destiny", releaseYear:2017, releaseMonth:2, popular:false},
+  {name:"RG 34 Zeong", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2017, releaseMonth:6, popular:false},
+  {name:"RG 35 Wing Gundam", grade:"Real Grade", series:"Gundam Wing", releaseYear:2018, releaseMonth:5, popular:false},
+  {name:"RG 36 Hi-Nu Gundam", grade:"Real Grade", series:"Char's Counterattack", releaseYear:2019, releaseMonth:1, popular:true},
+  {name:"RG 37 God Gundam", grade:"Real Grade", series:"G Gundam", releaseYear:2020, releaseMonth:1, popular:false},
+  {name:"RG 38 Gundam Epyon", grade:"Real Grade", series:"Gundam Wing", releaseYear:2020, releaseMonth:9, popular:false},
+  {name:"RG 39 Force Impulse Gundam Spec-II", grade:"Real Grade", series:"Gundam SEED Destiny", releaseYear:2021, releaseMonth:3, popular:false},
+  {name:"RG 40 RX-78-2 Gundam Ver. 2.0", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2021, releaseMonth:9, popular:true},
+  {name:"RG 41 Akatsuki Gundam (Oowashi)", grade:"Real Grade", series:"Gundam SEED Destiny", releaseYear:2022, releaseMonth:6, popular:false},
+  {name:"RG 42 Shining Gundam", grade:"Real Grade", series:"G Gundam", releaseYear:2023, releaseMonth:2, popular:false},
+  {name:"RG 43 Wing Gundam Zero", grade:"Real Grade", series:"Gundam Wing", releaseYear:2023, releaseMonth:6, popular:false},
+
+  // --- Real Grade: non-Gundam franchises ---
+  {name:"RG Evangelion Unit-01", grade:"Real Grade", series:"Non-Gundam / Other", releaseYear:2020, releaseMonth:7, popular:true},
+  {name:"RG Evangelion Unit-00", grade:"Real Grade", series:"Non-Gundam / Other", releaseYear:2020, releaseMonth:9, popular:false},
+  {name:"RG Evangelion Unit-02", grade:"Real Grade", series:"Non-Gundam / Other", releaseYear:2020, releaseMonth:12, popular:false},
+  {name:"RG GaoGaiGar", grade:"Real Grade", series:"Non-Gundam / Other", releaseYear:2022, releaseMonth:9, popular:false},
+  {name:"RG GoldyMarg", grade:"Real Grade", series:"Non-Gundam / Other", releaseYear:2023, releaseMonth:8, popular:false, pbandai:true},
+
+  // --- Real Grade: Premium Bandai exclusive variants ---
+  {name:"RG Strike Gundam", grade:"Real Grade", series:"Gundam SEED", releaseYear:2012, releaseMonth:3, popular:false, pbandai:true},
+  {name:"RG Freedom Gundam (Deactive Mode)", grade:"Real Grade", series:"Gundam SEED", releaseYear:2012, releaseMonth:5, popular:false, pbandai:true},
+  {name:"RG Justice Gundam (Deactive Mode)", grade:"Real Grade", series:"Gundam SEED", releaseYear:2013, releaseMonth:1, popular:false, pbandai:true},
+  {name:"RG Strike Rouge + I.W.S.P.", grade:"Real Grade", series:"Gundam SEED", releaseYear:2013, releaseMonth:5, popular:false, pbandai:true},
+  {name:"RG Zeta Gundam 3A Type", grade:"Real Grade", series:"Mobile Suit Zeta Gundam", releaseYear:2013, releaseMonth:9, popular:false, pbandai:true},
+  {name:"RG Casval's Gundam", grade:"Real Grade", series:"The Origin", releaseYear:2014, releaseMonth:5, popular:false, pbandai:true},
+  {name:"RG Gundam Astraea Type F", grade:"Real Grade", series:"Gundam 00", releaseYear:2014, releaseMonth:9, popular:false, pbandai:true},
+  {name:"RG G-3 Gundam", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2015, releaseMonth:3, popular:false, pbandai:true},
+  {name:"RG Z'Gok", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2015, releaseMonth:6, popular:false, pbandai:true},
+  {name:"RG Gundam Astray Blue Frame", grade:"Real Grade", series:"Gundam SEED", releaseYear:2015, releaseMonth:10, popular:false, pbandai:true},
+  {name:"RG Gundam Astray Gold Frame", grade:"Real Grade", series:"Gundam SEED", releaseYear:2016, releaseMonth:3, popular:false, pbandai:true},
+  {name:"RG 00 Gundam Seven Sword", grade:"Real Grade", series:"Gundam 00", releaseYear:2016, releaseMonth:8, popular:false, pbandai:true},
+  {name:"RG Gundam Exia Repair II", grade:"Real Grade", series:"Gundam 00", releaseYear:2017, releaseMonth:4, popular:false, pbandai:true},
+  {name:"RG Gundam Astray Gold Frame Amatsu", grade:"Real Grade", series:"Gundam SEED", releaseYear:2017, releaseMonth:9, popular:false, pbandai:true},
+  {name:"RG Zaku II High Mobility Type (Shin Matsunaga Custom)", grade:"Real Grade", series:"Mobile Suit Gundam", releaseYear:2018, releaseMonth:8, popular:false, pbandai:true},
+  {name:"RG Gundam Astray Gold Frame Amatsu Hana", grade:"Real Grade", series:"Gundam SEED", releaseYear:2019, releaseMonth:3, popular:false, pbandai:true},
+  {name:"RG Perfect Strike Gundam", grade:"Real Grade", series:"Gundam SEED", releaseYear:2019, releaseMonth:6, popular:false, pbandai:true},
+  {name:"RG Crossbone Gundam X-2", grade:"Real Grade", series:"Gundam F91", releaseYear:2019, releaseMonth:11, popular:false, pbandai:true},
+  {name:"RG Unicorn Gundam 03 Phenex (Narrative Ver.)", grade:"Real Grade", series:"Gundam Unicorn", releaseYear:2020, releaseMonth:2, popular:true, pbandai:true},
+  {name:"RG Nu Gundam HWS", grade:"Real Grade", series:"Char's Counterattack", releaseYear:2020, releaseMonth:11, popular:false, pbandai:true},
+];
+
+let state = {
+  profiles: [],
+  activeProfile: null,
+  kits: [],
+  folder: "All",
+  search: "",
+  gradeFilter: "All",
+  seriesFilter: "All",
+  sort: "year-desc",
+  editingKitId: null,
+  chosenColor: AVATAR_COLORS[0],
+  discoverTab: "recent",
+  discoverSearch: "",
+  discoverGradeFilter: "All",
+  discoverSeriesFilter: "All",
+  currentView: "discover",
+  portfolioPage: 1,
+  discoverPage: 1,
+  portfolioViewMode: "grid",
+  discoverViewMode: "grid",
+};
+
+const PAGE_SIZE = 25;
+
+async function storeGet(key){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+async function storeSet(key, value){
+  try{
+    localStorage.setItem(key, JSON.stringify(value));
+  }catch(e){ console.error("storage set failed", key, e); }
+}
+
+function kitsKey(profileName){ return "kits:" + profileName; }
+
+function hashStr(str){
+  let h = 0;
+  for(let i=0;i<str.length;i++){ h = (h*31 + str.charCodeAt(i)) >>> 0; }
+  return h;
+}
+function mechThumb(seedStr){
+  const h = hashStr(seedStr);
+  const accent = ACCENT_COLORS[h % ACCENT_COLORS.length];
+  const antennaCount = h % 3;
+  const visorType = (h >> 3) % 2;
+  const shoulderW = 30 + (h >> 5) % 14;
+  let antennaSvg = "";
+  if(antennaCount === 1){
+    antennaSvg = '<line x1="60" y1="17" x2="60" y2="6" stroke="'+accent+'" stroke-width="2"/>';
+  }else if(antennaCount === 2){
+    antennaSvg = '<line x1="52" y1="18" x2="45" y2="7" stroke="'+accent+'" stroke-width="2"/><line x1="68" y1="18" x2="75" y2="7" stroke="'+accent+'" stroke-width="2"/>';
+  }
+  let visorSvg = visorType === 0
+    ? '<rect x="49" y="31" width="22" height="5" rx="1" fill="'+accent+'" opacity="0.85"/>'
+    : '<circle cx="53" cy="33" r="3.2" fill="'+accent+'"/><circle cx="67" cy="33" r="3.2" fill="'+accent+'"/>';
+  return '<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg">'
+    + '<line x1="0" y1="80" x2="120" y2="80" stroke="#C9C3B5" stroke-width="1" stroke-dasharray="3,3"/>'
+    + antennaSvg
+    + '<circle cx="60" cy="34" r="17" fill="none" stroke="'+accent+'" stroke-width="2.2"/>'
+    + visorSvg
+    + '<path d="M '+(60-shoulderW/2-14)+' 66 L '+(60-shoulderW/2)+' 52 L '+(60+shoulderW/2)+' 52 L '+(60+shoulderW/2+14)+' 66 Z" fill="none" stroke="'+accent+'" stroke-width="2.2"/>'
+    + '<rect x="'+(60-6)+'" y="50" width="12" height="10" fill="none" stroke="'+accent+'" stroke-width="2"/>'
+    + '</svg>';
+}
+
+async function init(){
+  populateSelect(document.getElementById("filter-grade"), ["All", ...GRADES]);
+  populateSelect(document.getElementById("filter-series"), ["All", ...SERIES]);
+  populateSelect(document.getElementById("discover-filter-grade"), ["All", ...GRADES]);
+  populateSelect(document.getElementById("discover-filter-series"), ["All", ...SERIES]);
+  populateSelect(document.getElementById("kit-grade"), GRADES);
+  populateSelect(document.getElementById("kit-series"), SERIES);
+  buildColorSwatches();
+
+  const profiles = await storeGet("profiles");
+  const active = await storeGet("active-profile");
+  state.profiles = profiles || [];
+  state.activeProfile = active || null;
+
+  if(!state.activeProfile || !state.profiles.find(p=>p.name===state.activeProfile)){
+    showOnboarding();
+  }else{
+    await enterWorkshop(state.activeProfile);
+  }
+  bindEvents();
+}
+
+function populateSelect(select, items){
+  select.innerHTML = "";
+  items.forEach(item=>{
+    const opt = document.createElement("option");
+    opt.value = item; opt.textContent = item;
+    select.appendChild(opt);
+  });
+}
+
+function buildColorSwatches(){
+  const wrap = document.getElementById("color-swatches");
+  wrap.innerHTML = "";
+  AVATAR_COLORS.forEach((c,i)=>{
+    const sw = document.createElement("div");
+    sw.className = "swatch" + (i===0 ? " selected" : "");
+    sw.style.background = c;
+    sw.addEventListener("click", ()=>{
+      state.chosenColor = c;
+      [...wrap.children].forEach(ch=>ch.classList.remove("selected"));
+      sw.classList.add("selected");
+    });
+    wrap.appendChild(sw);
+  });
+}
+
+function showOnboarding(){
+  document.getElementById("app-header").style.display = "none";
+  document.getElementById("main-view").style.display = "none";
+  document.getElementById("add-kit-fab").style.display = "none";
+  document.getElementById("onboard-view").style.display = "block";
+
+  const existingWrap = document.getElementById("existing-profiles");
+  existingWrap.innerHTML = "";
+  if(state.profiles.length){
+    const label = document.createElement("div");
+    label.style.cssText = "font-size:12px;color:var(--steel);margin-bottom:8px;";
+    label.textContent = "Existing profiles:";
+    existingWrap.appendChild(label);
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;";
+    state.profiles.forEach(p=>{
+      const b = document.createElement("button");
+      b.className = "btn btn-outline btn-sm";
+      b.textContent = p.name;
+      b.addEventListener("click", ()=> enterWorkshop(p.name));
+      row.appendChild(b);
+    });
+    existingWrap.appendChild(row);
+  }
+}
+
+async function enterWorkshop(profileName){
+  state.activeProfile = profileName;
+  await storeSet("active-profile", profileName);
+  const kits = await storeGet(kitsKey(profileName));
+  state.kits = kits || [];
+  state.currentView = state.kits.length === 0 ? "discover" : "portfolio";
+
+  const profile = state.profiles.find(p=>p.name===profileName);
+  document.getElementById("profile-name-label").textContent = profileName;
+  const avatar = document.getElementById("profile-avatar");
+  avatar.textContent = profileName.charAt(0).toUpperCase();
+  avatar.style.background = (profile && profile.color) || AVATAR_COLORS[0];
+
+  document.getElementById("onboard-view").style.display = "none";
+  document.getElementById("app-header").style.display = "flex";
+  document.getElementById("main-nav").style.display = "flex";
+  document.getElementById("main-view").style.display = "block";
+  document.getElementById("add-kit-fab").style.display = "flex";
+  closeOverlay("profile-overlay");
+
+  renderFolderTabs();
+  renderAll();
+}
+
+function setView(view){
+  state.currentView = view;
+
+  document.getElementById("portfolio-section").style.display = view === "portfolio" ? "block" : "none";
+  document.getElementById("discover-section").style.display = view === "discover" ? "block" : "none";
+  document.getElementById("add-kit-fab").style.display = view === "portfolio" ? "flex" : "none";
+
+  [...document.querySelectorAll(".nav-item")].forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.view === view);
+  });
+}
+
+function renderFolderTabs(){
+  const tabs = [
+    {key:"All", label:"All Kits"},
+    {key:"Wishlist", label:"Wishlist"},
+    {key:"Backlog", label:"Backlog"},
+    {key:"Built", label:"Built"},
+  ];
+  const wrap = document.getElementById("folder-tabs");
+  wrap.innerHTML = "";
+  tabs.forEach(t=>{
+    const count = t.key==="All" ? state.kits.length : state.kits.filter(k=>k.status===t.key).length;
+    const btn = document.createElement("button");
+    btn.className = "tab" + (state.folder===t.key ? " active" : "");
+    btn.innerHTML = t.label + ' <span class="cnt">' + count + '</span>';
+    btn.addEventListener("click", ()=>{
+      state.folder = t.key;
+      state.portfolioPage = 1;
+      renderFolderTabs();
+      renderGrid();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function renderStats(){
+  document.getElementById("stat-total").textContent = state.kits.length;
+  document.getElementById("stat-built").textContent = state.kits.filter(k=>k.status==="Built").length;
+  document.getElementById("stat-backlog").textContent = state.kits.filter(k=>k.status==="Backlog").length;
+  document.getElementById("stat-wishlist").textContent = state.kits.filter(k=>k.status==="Wishlist").length;
+}
+
+function getFilteredSortedKits(){
+  let list = state.kits.slice();
+  if(state.folder !== "All"){
+    list = list.filter(k=>k.status===state.folder);
+  }
+  if(state.gradeFilter !== "All"){
+    list = list.filter(k=>k.grade===state.gradeFilter);
+  }
+  if(state.seriesFilter !== "All"){
+    list = list.filter(k=>k.series===state.seriesFilter);
+  }
+  if(state.search.trim()){
+    const q = state.search.trim().toLowerCase();
+    list = list.filter(k=>k.name.toLowerCase().includes(q));
+  }
+  switch(state.sort){
+    case "name-asc": list.sort((a,b)=>a.name.localeCompare(b.name)); break;
+    case "year-desc": list.sort((a,b)=>(b.releaseYear||0)-(a.releaseYear||0)); break;
+    case "year-asc": list.sort((a,b)=>(a.releaseYear||0)-(b.releaseYear||0)); break;
+    case "grade-asc": list.sort((a,b)=>a.grade.localeCompare(b.grade)); break;
+    default: list.sort((a,b)=>(b.dateAdded||0)-(a.dateAdded||0));
+  }
+  return list;
+}
+
+function renderPagination(containerId, currentPage, totalItems, onPageChange){
+  const container = document.getElementById(containerId);
+  const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  container.innerHTML = "";
+  if(totalPages <= 1) return;
+
+  const makeBtn = (label, page, opts={}) => {
+    const btn = document.createElement("button");
+    btn.className = "page-btn" + (opts.active ? " active" : "");
+    btn.textContent = label;
+    btn.disabled = !!opts.disabled;
+    if(!opts.disabled && !opts.active){
+      btn.addEventListener("click", ()=> onPageChange(page));
+    }
+    return btn;
+  };
+
+  container.appendChild(makeBtn("\u2039 Prev", currentPage - 1, {disabled: currentPage <= 1}));
+
+  const pageNumbers = new Set([1, totalPages, currentPage, currentPage-1, currentPage+1]);
+  let lastShown = 0;
+  [...pageNumbers].filter(p=>p>=1 && p<=totalPages).sort((a,b)=>a-b).forEach(p=>{
+    if(lastShown && p - lastShown > 1){
+      const gap = document.createElement("span");
+      gap.className = "page-info";
+      gap.textContent = "...";
+      container.appendChild(gap);
+    }
+    container.appendChild(makeBtn(String(p), p, {active: p === currentPage}));
+    lastShown = p;
+  });
+
+  container.appendChild(makeBtn("Next \u203a", currentPage + 1, {disabled: currentPage >= totalPages}));
+
+  const info = document.createElement("span");
+  info.className = "page-info";
+  info.textContent = totalItems + " kit" + (totalItems === 1 ? "" : "s") + " total";
+  container.appendChild(info);
+}
+
+function renderGrid(){
+  const grid = document.getElementById("kit-grid");
+  const tableWrap = document.getElementById("kit-table-wrap");
+  const tableBody = document.getElementById("kit-table-body");
+  const isListMode = state.portfolioViewMode === "list";
+  grid.style.display = isListMode ? "none" : "grid";
+  tableWrap.style.display = isListMode ? "block" : "none";
+
+  const fullList = getFilteredSortedKits();
+  const totalPages = Math.max(1, Math.ceil(fullList.length / PAGE_SIZE));
+  if(state.portfolioPage > totalPages) state.portfolioPage = totalPages;
+  if(state.portfolioPage < 1) state.portfolioPage = 1;
+  const startIdx = (state.portfolioPage - 1) * PAGE_SIZE;
+  const list = fullList.slice(startIdx, startIdx + PAGE_SIZE);
+  grid.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  if(fullList.length === 0){
+    const emptyHtml = state.kits.length === 0
+      ? '<div class="display">Start your portfolio</div><div>Your shelf is empty for now. Browse recently released and popular kits on the Discover page and add them straight to your Wishlist, Backlog, or Built list &mdash; or log a kit manually with the + button.</div>'
+      : '<div class="display">Empty parts bag</div><div>No kits match here yet. Try adjusting your filters.</div>';
+    if(isListMode){
+      const row = document.createElement("tr");
+      row.innerHTML = '<td colspan="6"><div class="empty" style="border:none;">' + emptyHtml + '</div></td>';
+      tableBody.appendChild(row);
+    }else{
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = emptyHtml;
+      grid.appendChild(empty);
+    }
+    document.getElementById("kit-pagination").innerHTML = "";
+    return;
+  }
+
+  list.forEach((kit, i)=>{
+    const idx = startIdx + i;
+    const gradeInitial = kit.grade.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+    const partNum = gradeInitial + "-" + String(idx+1).padStart(2,"0");
+    const pillClass = kit.status.toLowerCase();
+    const pbBadge = kit.pbandai ? '<span class="pbandai-badge">P-Bandai Exclusive</span>' : "";
+
+    if(isListMode){
+      const row = document.createElement("tr");
+      row.innerHTML = "<td><div class=\"table-thumb\">" + mechThumb(kit.name + kit.grade) + "</div></td>"
+        + "<td><div class=\"table-name-cell\"><span>" + escapeHtml(kit.name) + "</span>" + (kit.pbandai ? '<span class="table-pb-tag">P-Bandai Exclusive</span>' : "") + "</div></td>"
+        + "<td><span class=\"grade-badge\">" + escapeHtml(kit.grade) + "</span></td>"
+        + "<td>" + escapeHtml(kit.series) + "</td>"
+        + "<td class=\"mono\">" + (kit.releaseYear || "&mdash;") + "</td>"
+        + "<td><span class=\"pill " + pillClass + "\">" + kit.status + "</span></td>";
+      row.addEventListener("click", ()=> openEditModal(kit));
+      tableBody.appendChild(row);
+    }else{
+      const card = document.createElement("div");
+      card.className = "kit-card";
+      card.innerHTML = "<div class=\"kit-thumb\">" + mechThumb(kit.name + kit.grade) + "</div>"
+        + "<span class=\"part-tag\">" + partNum + "</span>"
+        + "<div class=\"kit-card-body\">"
+        + "<div class=\"kit-name\">" + escapeHtml(kit.name) + "</div>"
+        + "<div class=\"kit-series\">" + escapeHtml(kit.series) + "</div>"
+        + "<div class=\"kit-meta\"><span class=\"grade-badge\">" + escapeHtml(kit.grade) + "</span><span class=\"year\">" + (kit.releaseYear || "&mdash;") + "</span></div>"
+        + (pbBadge ? "<div style=\"margin-top:6px;\">" + pbBadge + "</div>" : "")
+        + "<div class=\"kit-footer-row\"><span class=\"pill " + pillClass + "\">" + kit.status + "</span></div>"
+        + "</div>";
+      card.addEventListener("click", ()=> openEditModal(kit));
+      grid.appendChild(card);
+    }
+  });
+
+  renderPagination("kit-pagination", state.portfolioPage, fullList.length, (p)=>{
+    state.portfolioPage = p;
+    renderGrid();
+    document.getElementById("portfolio-section").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+}
+
+function escapeHtml(str){
+  const d = document.createElement("div");
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function renderAll(){
+  renderStats();
+  renderFolderTabs();
+  renderGrid();
+  renderDiscover();
+  setView(state.currentView);
+}
+
+function isInPortfolio(catalogItem){
+  return state.kits.some(k=>k.name===catalogItem.name && k.grade===catalogItem.grade);
+}
+
+function getDiscoverList(){
+  let list;
+  if(state.discoverTab === "popular"){
+    list = CATALOG.filter(k=>k.popular);
+  }else{
+    list = CATALOG.slice().sort((a,b)=>{
+      const av = a.releaseYear*372 + (a.releaseMonth||6)*31 + (a.releaseDay||15);
+      const bv = b.releaseYear*372 + (b.releaseMonth||6)*31 + (b.releaseDay||15);
+      return bv - av;
+    });
+  }
+  if(state.discoverGradeFilter !== "All"){
+    list = list.filter(k=>k.grade===state.discoverGradeFilter);
+  }
+  if(state.discoverSeriesFilter !== "All"){
+    list = list.filter(k=>k.series===state.discoverSeriesFilter);
+  }
+  if(state.discoverSearch.trim()){
+    const q = state.discoverSearch.trim().toLowerCase();
+    list = list.filter(k=>k.name.toLowerCase().includes(q));
+  }
+  return list;
+}
+
+function renderDiscover(){
+  const grid = document.getElementById("discover-grid");
+  const tableWrap = document.getElementById("discover-table-wrap");
+  const tableBody = document.getElementById("discover-table-body");
+  const isListMode = state.discoverViewMode === "list";
+  grid.style.display = isListMode ? "none" : "grid";
+  tableWrap.style.display = isListMode ? "block" : "none";
+
+  const fullList = getDiscoverList();
+  const totalPages = Math.max(1, Math.ceil(fullList.length / PAGE_SIZE));
+  if(state.discoverPage > totalPages) state.discoverPage = totalPages;
+  if(state.discoverPage < 1) state.discoverPage = 1;
+  const startIdx = (state.discoverPage - 1) * PAGE_SIZE;
+  const list = fullList.slice(startIdx, startIdx + PAGE_SIZE);
+  grid.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  if(fullList.length === 0){
+    const emptyHtml = '<div class="display">No kits match</div><div>Try adjusting your search or filters.</div>';
+    if(isListMode){
+      const row = document.createElement("tr");
+      row.innerHTML = '<td colspan="6"><div class="empty" style="border:none;">' + emptyHtml + '</div></td>';
+      tableBody.appendChild(row);
+    }else{
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = emptyHtml;
+      grid.appendChild(empty);
+    }
+    document.getElementById("discover-pagination").innerHTML = "";
+    return;
+  }
+
+  list.forEach(item=>{
+    const owned = isInPortfolio(item);
+    const pbBadge = item.pbandai ? '<span class="pbandai-badge">P-Bandai Exclusive</span>' : "";
+
+    if(isListMode){
+      const row = document.createElement("tr");
+      row.innerHTML = "<td><div class=\"table-thumb\">" + mechThumb(item.name + item.grade) + "</div></td>"
+        + "<td><div class=\"table-name-cell\"><span>" + escapeHtml(item.name) + "</span>" + (item.pbandai ? '<span class="table-pb-tag">P-Bandai Exclusive</span>' : "") + "</div></td>"
+        + "<td><span class=\"grade-badge\">" + escapeHtml(item.grade) + "</span></td>"
+        + "<td>" + escapeHtml(item.series) + "</td>"
+        + "<td class=\"mono\">" + item.releaseYear + "</td>"
+        + "<td><button type=\"button\" class=\"btn btn-sm " + (owned ? "btn-outline" : "btn-primary") + "\" " + (owned ? "disabled" : "") + ">" + (owned ? "In portfolio" : "+ Add") + "</button></td>";
+      if(!owned){
+        const btn = row.querySelector("button");
+        btn.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          addCatalogItemToPortfolio(item, btn);
+        });
+      }
+      tableBody.appendChild(row);
+    }else{
+      const card = document.createElement("div");
+      card.className = "kit-card discover-card";
+      card.innerHTML = "<div class=\"kit-thumb\">" + mechThumb(item.name + item.grade) + "</div>"
+        + "<div class=\"kit-card-body\">"
+        + "<div class=\"kit-name\">" + escapeHtml(item.name) + "</div>"
+        + "<div class=\"kit-series\">" + escapeHtml(item.series) + "</div>"
+        + "<div class=\"kit-meta\"><span class=\"grade-badge\">" + escapeHtml(item.grade) + "</span><span class=\"year\">" + item.releaseYear + "</span></div>"
+        + (pbBadge ? "<div style=\"margin-top:6px;\">" + pbBadge + "</div>" : "")
+        + "<div class=\"kit-footer-row\"><button type=\"button\" class=\"btn btn-sm " + (owned ? "btn-outline" : "btn-primary") + "\" " + (owned ? "disabled" : "") + ">" + (owned ? "In portfolio" : "+ Add to portfolio") + "</button></div>"
+        + "</div>";
+      if(!owned){
+        const btn = card.querySelector("button");
+        btn.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          addCatalogItemToPortfolio(item, btn);
+        });
+      }
+      grid.appendChild(card);
+    }
+  });
+
+  renderPagination("discover-pagination", state.discoverPage, fullList.length, (p)=>{
+    state.discoverPage = p;
+    renderDiscover();
+    document.getElementById("discover-section").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+}
+
+async function addCatalogItemToPortfolio(item, btnEl){
+  state.kits.push({
+    id: "k" + Date.now() + Math.floor(Math.random()*1000),
+    name: item.name,
+    grade: item.grade,
+    series: item.series,
+    releaseYear: item.releaseYear,
+    status: "Wishlist",
+    notes: "",
+    pbandai: !!item.pbandai,
+    dateAdded: Date.now()
+  });
+  await storeSet(kitsKey(state.activeProfile), state.kits);
+  if(btnEl){
+    btnEl.textContent = "Added";
+    btnEl.disabled = true;
+    btnEl.classList.remove("btn-primary");
+    btnEl.classList.add("btn-outline");
+  }
+  renderStats();
+  renderFolderTabs();
+  renderGrid();
+  setView(state.currentView);
+}
+
+function openAddModal(){
+  state.editingKitId = null;
+  document.getElementById("kit-modal-label").textContent = "FIG. 01 — ADD KIT";
+  document.getElementById("kit-modal-title").textContent = "Add Kit";
+  document.getElementById("kit-form").reset();
+  document.getElementById("delete-kit-btn").style.visibility = "hidden";
+  document.getElementById("kit-status").value = "Wishlist";
+  document.getElementById("kit-pbandai").checked = false;
+  openOverlay("kit-overlay");
+  document.getElementById("kit-name").focus();
+}
+
+function openEditModal(kit){
+  state.editingKitId = kit.id;
+  document.getElementById("kit-modal-label").textContent = "FIG. 01 — EDIT KIT";
+  document.getElementById("kit-modal-title").textContent = "Edit Kit";
+  document.getElementById("kit-name").value = kit.name;
+  document.getElementById("kit-grade").value = kit.grade;
+  document.getElementById("kit-series").value = kit.series;
+  document.getElementById("kit-year").value = kit.releaseYear || "";
+  document.getElementById("kit-status").value = kit.status;
+  document.getElementById("kit-pbandai").checked = !!kit.pbandai;
+  document.getElementById("kit-notes").value = kit.notes || "";
+  document.getElementById("delete-kit-btn").style.visibility = "visible";
+  openOverlay("kit-overlay");
+}
+
+async function saveKitForm(e){
+  e.preventDefault();
+  const name = document.getElementById("kit-name").value.trim();
+  if(!name) return;
+  const grade = document.getElementById("kit-grade").value;
+  const series = document.getElementById("kit-series").value;
+  const releaseYear = parseInt(document.getElementById("kit-year").value) || null;
+  const status = document.getElementById("kit-status").value;
+  const pbandai = document.getElementById("kit-pbandai").checked;
+  const notes = document.getElementById("kit-notes").value.trim();
+
+  if(state.editingKitId){
+    const kit = state.kits.find(k=>k.id===state.editingKitId);
+    Object.assign(kit, {name, grade, series, releaseYear, status, pbandai, notes});
+  }else{
+    state.kits.push({
+      id: "k" + Date.now() + Math.floor(Math.random()*1000),
+      name, grade, series, releaseYear, status, pbandai, notes,
+      dateAdded: Date.now()
+    });
+  }
+  await storeSet(kitsKey(state.activeProfile), state.kits);
+  closeOverlay("kit-overlay");
+  renderAll();
+}
+
+async function deleteKit(){
+  if(!state.editingKitId) return;
+  state.kits = state.kits.filter(k=>k.id !== state.editingKitId);
+  await storeSet(kitsKey(state.activeProfile), state.kits);
+  closeOverlay("kit-overlay");
+  renderAll();
+}
+
+function openProfileModal(){
+  const wrap = document.getElementById("profile-list");
+  wrap.innerHTML = "";
+  state.profiles.forEach(p=>{
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--steel-line);";
+    const isActive = p.name === state.activeProfile;
+    row.innerHTML = "<div style=\"display:flex;align-items:center;gap:8px;\"><span style=\"width:20px;height:20px;border-radius:50%;background:" + p.color + ";display:inline-block;\"></span><span>" + escapeHtml(p.name) + (isActive ? " <small style=\"color:var(--steel);\">(active)</small>" : "") + "</span></div>";
+    const btn = document.createElement("button");
+    btn.className = "btn btn-sm " + (isActive ? "btn-ghost" : "btn-outline");
+    btn.style.color = isActive ? "var(--steel)" : "";
+    btn.textContent = isActive ? "Current" : "Switch to";
+    btn.disabled = isActive;
+    btn.addEventListener("click", ()=> enterWorkshop(p.name));
+    row.appendChild(btn);
+    wrap.appendChild(row);
+  });
+  openOverlay("profile-overlay");
+}
+
+async function addProfile(name){
+  name = name.trim();
+  if(!name) return;
+  if(state.profiles.find(p=>p.name===name)){
+    enterWorkshop(name);
+    return;
+  }
+  const color = AVATAR_COLORS[state.profiles.length % AVATAR_COLORS.length];
+  state.profiles.push({name, color});
+  await storeSet("profiles", state.profiles);
+  enterWorkshop(name);
+}
+
+function openOverlay(id){ document.getElementById(id).classList.add("show"); }
+function closeOverlay(id){ document.getElementById(id).classList.remove("show"); }
+
+function bindEvents(){
+  document.getElementById("create-profile-btn").addEventListener("click", async ()=>{
+    const nameInput = document.getElementById("new-profile-input");
+    const name = nameInput.value.trim();
+    if(!name){ nameInput.focus(); return; }
+    if(state.profiles.find(p=>p.name===name)){
+      enterWorkshop(name);
+      return;
+    }
+    state.profiles.push({name, color: state.chosenColor});
+    await storeSet("profiles", state.profiles);
+    nameInput.value = "";
+    enterWorkshop(name);
+  });
+
+  document.getElementById("switch-profile-btn").addEventListener("click", openProfileModal);
+  document.getElementById("profile-modal-close").addEventListener("click", ()=>closeOverlay("profile-overlay"));
+  document.getElementById("add-profile-btn").addEventListener("click", ()=>{
+    const input = document.getElementById("add-profile-input");
+    addProfile(input.value);
+    input.value = "";
+  });
+
+  document.getElementById("add-kit-fab").addEventListener("click", openAddModal);
+  document.getElementById("kit-modal-close").addEventListener("click", ()=>closeOverlay("kit-overlay"));
+  document.getElementById("kit-cancel-btn").addEventListener("click", ()=>closeOverlay("kit-overlay"));
+  document.getElementById("kit-form").addEventListener("submit", saveKitForm);
+  document.getElementById("delete-kit-btn").addEventListener("click", deleteKit);
+
+  document.getElementById("view-toggle").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".view-toggle-btn");
+    if(!btn) return;
+    state.portfolioViewMode = btn.dataset.mode;
+    [...document.querySelectorAll("#view-toggle .view-toggle-btn")].forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    renderGrid();
+  });
+
+  document.getElementById("discover-view-toggle").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".view-toggle-btn");
+    if(!btn) return;
+    state.discoverViewMode = btn.dataset.mode;
+    [...document.querySelectorAll("#discover-view-toggle .view-toggle-btn")].forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    renderDiscover();
+  });
+
+  document.getElementById("search-input").addEventListener("input", (e)=>{
+    state.search = e.target.value;
+    state.portfolioPage = 1;
+    renderGrid();
+  });
+  document.getElementById("filter-grade").addEventListener("change", (e)=>{
+    state.gradeFilter = e.target.value;
+    state.portfolioPage = 1;
+    renderGrid();
+  });
+  document.getElementById("filter-series").addEventListener("change", (e)=>{
+    state.seriesFilter = e.target.value;
+    state.portfolioPage = 1;
+    renderGrid();
+  });
+  document.getElementById("sort-select").addEventListener("change", (e)=>{
+    state.sort = e.target.value;
+    state.portfolioPage = 1;
+    renderGrid();
+  });
+
+  document.getElementById("discover-tabs").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".tab");
+    if(!btn) return;
+    [...document.querySelectorAll("#discover-tabs .tab")].forEach(t=>t.classList.remove("active"));
+    btn.classList.add("active");
+    state.discoverTab = btn.dataset.tab;
+    state.discoverPage = 1;
+    renderDiscover();
+  });
+
+  document.getElementById("discover-search-input").addEventListener("input", (e)=>{
+    state.discoverSearch = e.target.value;
+    state.discoverPage = 1;
+    renderDiscover();
+  });
+  document.getElementById("discover-filter-grade").addEventListener("change", (e)=>{
+    state.discoverGradeFilter = e.target.value;
+    state.discoverPage = 1;
+    renderDiscover();
+  });
+  document.getElementById("discover-filter-series").addEventListener("change", (e)=>{
+    state.discoverSeriesFilter = e.target.value;
+    state.discoverPage = 1;
+    renderDiscover();
+  });
+
+  document.getElementById("main-nav").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".nav-item");
+    if(!btn) return;
+    setView(btn.dataset.view);
+  });
+
+  [...document.querySelectorAll(".overlay")].forEach(ov=>{
+    ov.addEventListener("click", (e)=>{
+      if(e.target === ov) ov.classList.remove("show");
+    });
+  });
+}
+
+init();
+</script>
+</body>
+</html>
